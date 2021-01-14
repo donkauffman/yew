@@ -82,8 +82,8 @@ pub struct Props<T: Clone> {
     #[prop_or_default]
     pub id: String,
     /// Placeholder value, shown at the top as a disabled option
-    #[prop_or(String::from("↪"))]
-    pub placeholder: String,
+    #[prop_or_default]
+    pub placeholder: Option<String>,
     /// A callback which is called when the value of the `<select>` changes.
     pub on_change: Callback<T>,
 }
@@ -134,6 +134,15 @@ where
 
     fn view(&self) -> Html {
         let selected = self.props.selected.as_ref();
+        let view_placeholder = || {
+            self.props.placeholder.iter().map(|value| {
+                html! {
+                    <option value="" disabled=true selected=selected.is_none()>
+                        { value.clone() }
+                    </option>
+                }
+            }).collect::<Html>()
+        };
         let view_option = |value: &T| {
             let flag = selected == Some(value);
             html! {
@@ -149,9 +158,7 @@ where
                 disabled=self.props.disabled
                 onchange=self.on_change()
             >
-                <option value="" disabled=true selected=selected.is_none()>
-                    { self.props.placeholder.clone() }
-                </option>
+                { view_placeholder() }
                 { for self.props.options.iter().map(view_option) }
             </select>
         }
@@ -205,7 +212,7 @@ mod tests {
     fn can_create_select_with_placeholder() {
         let on_change = Callback::<u8>::default();
         html! {
-            <Select<u8> on_change=on_change placeholder="--Please choose an option--" />
+            <Select<u8> on_change=on_change placeholder=Some("--Please choose an option--") />
         };
     }
 }
