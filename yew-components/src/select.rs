@@ -107,7 +107,12 @@ where
         match msg {
             Msg::Selected(value) => {
                 if let Some(idx) = value {
-                    let item = self.props.options.get(idx);
+                    let offset = if self.props.placeholder.is_none() {
+                        0
+                    } else {
+                        1
+                    };
+                    let item = self.props.options.get(idx - offset);
                     if let Some(value) = item {
                         self.props.on_change.emit(value.clone());
                     }
